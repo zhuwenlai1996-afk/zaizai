@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual envs
+venv/
+.venv/
+env/
+ENV/
+
+# PyInstaller
+build/
+dist/
+*.manifest
+
+# Model weights (auto-downloaded; large files)
+weights/
+gfpgan/
+realesrgan_weights/
+*.pth
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Output
+output/
+results/
+*_restored.*
