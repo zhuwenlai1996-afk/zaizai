@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create the complete Python attendance ranking automation script that reads the source Excel, performs all calculations, and generates a beautifully formatted output Excel with conditional formatting, charts, and multiple sheets ready for monthly reporting.",
+  "status": "completed",
+  "steps": [
+    "Create directory attendance_ranking/ in the project root.",
+    "Create attendance_ranking/ranking.py as the main script with the following modules/sections: (1) Parameter reading - read 参数设置 sheet: start_date from B4, end_date from B5, threshold from B6, special_workdays from E5:E100 (non-empty dates), excluded_dates from H5:H100 (non-empty dates), department config from K4:L10 (职能部门) and N4:O10 (销售部门). (2) Roster reading - read 名单_维护 sheet: columns 工号(A), 部门(B), HRBP(C), 姓名(D), 是否统计(E), 入离职时间(F), 标记(G), all rows where 工号 is not empty. (3) Source data reading - read 源数据_粘贴 sheet columns A:R only (raw data), key columns: 工号(col C index 2), 考勤日期(col L index 11), 工作时长(col Q index 16). (4) Date classification function: given a date, determine if it is 排除/工作日/普通周六/周日. Logic: if date in excluded_dates -> 排除; elif date.weekday() < 5 (Mon-Fri) or date in special_workdays -> 工作日; elif date.weekday() == 5 -> 普通周六; else -> 周日. (5) Working day count calculation: count Mon-Fri dates in range that are NOT in excluded_dates, PLUS special_workday dates that fall on Sat/Sun and are in range and NOT in excluded_dates. (6) Per-person calculation: for each person in roster, find all their attendance records by 工号 match. For each record: classify date, if 工作日 and hours >= threshold and date in range -> add to workday_total, increment valid_days; if 普通周六 and date in range and not excluded -> add to saturday_total. (7) Average calculation: if valid_days == 0 or workday_count == 0 then 0, else (workday_total / valid_days) + (saturday_total / workday_count). (8) Individual ranking: rank all 121 people by average descending. Use dense-rank-like logic matching Excel RANK: same average gets same rank, next person skips. (9) Department ranking: for each department in 职能部门 list and 销售部门 list, compute average of individual averages where 是否统计=统计 AND individual_average > 0. Rank within each category. (10) Anomaly/check notes: for 不统计 people, add note '不统计：参与个人排名/不计部门排名'; for people with 0 valid days add '无有效工作日记录'.",
+    "Create the Excel output generation in attendance_ranking/ranking.py using openpyxl: (1) 个人排名 sheet - headers: 名次/工号/部门/部门类型/HRBP/姓名/是否统计/工作日总时长/工作日有效天数/普通周六总时长/工作日天数/平均时长/异常提示. Apply conditional formatting: top 10 rows light green background, bottom 10 (non-zero average) rows light red background, alternating row colors (light gray/white), header row dark blue with white bold text, number format for 平均时长 to 2 decimal places. Auto-fit column widths. (2) 部门排名 sheet - two sections side by side: 职能部门排名 (cols A-D) and 销售部门排名 (cols F-I). Each has: 部门/一号位/平均时长/名次. Add a bar chart below each ranking table showing department avg hours. (3) 月度排名 sheet - title row with date range, then two sections: 个人TOP10 (cols A-E: 名次/工号/姓名/部门/平均时长) and 部门排名 (cols G-J: 类别/部门/一号位/平均时长). Format as a clean report ready to send. (4) 检查项 sheet - data quality checks: source data date range, record count, working day count, roster counts, special workday count, excluded date count, unmatched records count, 不统计 people in ranking count.",
+    "Add chart generation using openpyxl.chart: (1) In 部门排名 sheet, create a BarChart for 职能部门 showing department names on X-axis and average hours on Y-axis. Create another BarChart for 销售部门. Place charts below the tables. (2) Optionally in 月度排名, add a combined bar chart showing all departments.",
+    "Create a CLI interface in attendance_ranking/ranking.py using argparse: --input/-i for input Excel path (default: the existing xlsx), --output/-o for output path (default: 合肥基地氛围排名_输出.xlsx). Print progress messages during processing.",
+    "Create attendance_ranking/README.md with usage instructions in Chinese: how to install dependencies, how to run the script, what output to expect, parameter explanation.",
+    "Create a simple test file tests/test_ranking.py that: (1) imports the ranking module, (2) runs the calculation on the existing Excel file, (3) validates that the top individual is 金永超 with avg ~14.53, (4) validates working day count is 14, (5) validates roster count is 121, (6) validates top 职能部门 is 人事+行政+财务 with avg ~13.34, (7) validates top 销售部门 is 整单技术 with avg ~13.33."
+  ],
+  "acceptance_criteria": [
+    "Running `python3 attendance_ranking/ranking.py -i '合肥基地氛围排名_严格排查修复_全名单个人排名.xlsx' -o output_test.xlsx` produces a valid Excel file.",
+    "The output Excel has 4 sheets: 个人排名, 部门排名, 月度排名, 检查项.",
+    "Individual ranking matches: #1 is 金永超 (研发中心) with average 14.53h.",
+    "Department ranking matches: top 职能 is 人事+行政+财务 (~13.34h), top 销售 is 整单技术 (~13.33h).",
+    "The 个人排名 sheet has conditional formatting (green top 10, red bottom 10, alternating rows).",
+    "The 部门排名 sheet has bar charts for both 职能 and 销售 departments.",
+    "Running `python3 -m pytest tests/test_ranking.py -v` passes all validation tests.",
+    "Total ranked individuals = 121 (all roster members)."
+  ],
+  "verification": [
+    "python3 attendance_ranking/ranking.py -i '合肥基地氛围排名_严格排查修复_全名单个人排名.xlsx' -o /tmp/test_output.xlsx",
+    "python3 -c \"import openpyxl; wb=openpyxl.load_workbook('/tmp/test_output.xlsx', data_only=True); print(wb.sheetnames); ws=wb['个人排名']; print(list(ws.iter_rows(min_row=2, max_row=2, max_col=13, values_only=True))[0])\"",
+    "python3 -m pytest tests/test_ranking.py -v"
+  ],
+  "blocked_reason": null,
+  "findings": "All validation values match exactly: working_days=14, top individual 金永超 avg=14.53, top 职能 人事+行政+财务 avg=13.34, top 销售 整单技术 avg=13.33. pytest installed via pip (not pre-installed). /tmp directory not writable for output files - tests use project-local paths instead. All 14 tests pass."
+}
