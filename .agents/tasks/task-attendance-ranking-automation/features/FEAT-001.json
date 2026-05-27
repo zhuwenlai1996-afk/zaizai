@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Create the complete Python attendance ranking automation script that reads the source Excel, performs all calculations, and generates a beautifully formatted output Excel with conditional formatting, charts, and multiple sheets ready for monthly reporting.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create directory attendance_ranking/ in the project root.",
     "Create attendance_ranking/ranking.py as the main script with the following modules/sections: (1) Parameter reading - read 参数设置 sheet: start_date from B4, end_date from B5, threshold from B6, special_workdays from E5:E100 (non-empty dates), excluded_dates from H5:H100 (non-empty dates), department config from K4:L10 (职能部门) and N4:O10 (销售部门). (2) Roster reading - read 名单_维护 sheet: columns 工号(A), 部门(B), HRBP(C), 姓名(D), 是否统计(E), 入离职时间(F), 标记(G), all rows where 工号 is not empty. (3) Source data reading - read 源数据_粘贴 sheet columns A:R only (raw data), key columns: 工号(col C index 2), 考勤日期(col L index 11), 工作时长(col Q index 16). (4) Date classification function: given a date, determine if it is 排除/工作日/普通周六/周日. Logic: if date in excluded_dates -> 排除; elif date.weekday() < 5 (Mon-Fri) or date in special_workdays -> 工作日; elif date.weekday() == 5 -> 普通周六; else -> 周日. (5) Working day count calculation: count Mon-Fri dates in range that are NOT in excluded_dates, PLUS special_workday dates that fall on Sat/Sun and are in range and NOT in excluded_dates. (6) Per-person calculation: for each person in roster, find all their attendance records by 工号 match. For each record: classify date, if 工作日 and hours >= threshold and date in range -> add to workday_total, increment valid_days; if 普通周六 and date in range and not excluded -> add to saturday_total. (7) Average calculation: if valid_days == 0 or workday_count == 0 then 0, else (workday_total / valid_days) + (saturday_total / workday_count). (8) Individual ranking: rank all 121 people by average descending. Use dense-rank-like logic matching Excel RANK: same average gets same rank, next person skips. (9) Department ranking: for each department in 职能部门 list and 销售部门 list, compute average of individual averages where 是否统计=统计 AND individual_average > 0. Rank within each category. (10) Anomaly/check notes: for 不统计 people, add note '不统计：参与个人排名/不计部门排名'; for people with 0 valid days add '无有效工作日记录'.",
@@ -28,5 +28,5 @@
     "python3 -m pytest tests/test_ranking.py -v"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All validation values match exactly: working_days=14, top individual 金永超 avg=14.53, top 职能 人事+行政+财务 avg=13.34, top 销售 整单技术 avg=13.33. pytest installed via pip (not pre-installed). /tmp directory not writable for output files - tests use project-local paths instead. All 14 tests pass."
 }
