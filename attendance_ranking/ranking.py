@@ -10,7 +10,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.chart import BarChart, Reference
 from openpyxl.utils import get_column_letter
-import pandas as pd
+
 
 
 def read_parameters(wb):
@@ -73,7 +73,7 @@ def read_roster(wb):
     """Read staff roster from 名单_维护 sheet."""
     ws = wb['名单_维护']
     roster = []
-    for row in ws.iter_rows(min_row=2, max_row=200, min_col=1, max_col=7, values_only=True):
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=7, values_only=True):
         if row[0] is not None:
             roster.append({
                 'employee_id': str(row[0]).strip(),
@@ -91,7 +91,7 @@ def read_source_data(wb):
     """Read attendance source data from 源数据_粘贴 sheet (columns A:R only)."""
     ws = wb['源数据_粘贴']
     records = []
-    for row in ws.iter_rows(min_row=2, max_row=6000, min_col=1, max_col=18, values_only=True):
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=18, values_only=True):
         if row[2] is not None:  # 工号 in column C (index 2)
             employee_id = str(row[2]).strip()
             att_date = row[11]  # 考勤日期 column L (index 11)
@@ -181,7 +181,11 @@ def calculate_rankings(params, roster, records):
             elif date_type == '普通周六':
                 saturday_total += rec['hours']
 
-        # Average calculation
+        # Average calculation: matches the original Excel formula behavior.
+        # workday_total is divided by valid_days (days actually worked), while
+        # saturday_total is divided by workday_count (total working days in the
+        # period) rather than by saturdays attended, spreading Saturday hours
+        # across the full working-day denominator.
         if valid_days == 0 or workday_count == 0:
             average = 0.0
         else:
@@ -222,11 +226,13 @@ def calculate_rankings(params, roster, records):
     individual_results.sort(key=lambda x: x['average'], reverse=True)
 
     # Assign ranks (standard competition ranking)
+    # Round averages to 10 decimal places before comparing to avoid
+    # floating-point noise causing different ranks for effectively equal values.
     if individual_results:
         rank = 1
         individual_results[0]['rank'] = rank
         for i in range(1, len(individual_results)):
-            if individual_results[i]['average'] < individual_results[i - 1]['average']:
+            if round(individual_results[i]['average'], 10) < round(individual_results[i - 1]['average'], 10):
                 rank = i + 1
             individual_results[i]['rank'] = rank
 

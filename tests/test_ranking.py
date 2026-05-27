@@ -101,10 +101,10 @@ class TestDepartmentRanking:
 
 
 class TestOutputGeneration:
-    def test_output_file_creation(self, params, results):
+    def test_output_file_creation(self, params, results, tmp_path):
         """Output Excel should be generated with correct sheets."""
         from attendance_ranking.ranking import generate_output
-        output_path = '/tmp/test_ranking_output.xlsx'
+        output_path = str(tmp_path / 'test_ranking_output.xlsx')
         generate_output(params, results, output_path)
         assert os.path.exists(output_path)
 
@@ -114,10 +114,10 @@ class TestOutputGeneration:
         assert '月度排名' in wb.sheetnames
         assert '检查项' in wb.sheetnames
 
-    def test_output_individual_count(self, params, results):
+    def test_output_individual_count(self, params, results, tmp_path):
         """Output 个人排名 should have 121 data rows."""
         from attendance_ranking.ranking import generate_output
-        output_path = '/tmp/test_ranking_output.xlsx'
+        output_path = str(tmp_path / 'test_ranking_output.xlsx')
         generate_output(params, results, output_path)
         wb = openpyxl.load_workbook(output_path)
         ws = wb['个人排名']
