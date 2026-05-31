@@ -1,0 +1,35 @@
+# 中文 AI 绘本生成器 · 配置示例
+#
+# 使用方法：
+#   1. 复制本文件: cp picture_book_gen/examples/config.example.yaml my_book.yaml
+#   2. 修改下面字段
+#   3. 运行: python -m picture_book_gen -c my_book.yaml -o ./book_output
+
+# ============ 必填 ============
+title: 子琪的云朵兔子大冒险
+topic: 陪伴与勇敢
+
+protagonist:
+  name: 华子琪
+  age: 5
+  # 主角外貌锚点（用于跨页一致性）
+  appearance: 黑色双低辫，珍珠头饰，圆脸，自信笑容，常穿白色纱裙
+
+# ============ 可选 ============
+target_age: "3-6"
+total_pages: 12
+
+art_style: 温暖水彩童书风格、柔和自然光、低饱和明亮色、梦幻但真实
+
+emotion_keywords:
+  - 陪伴
+  - 勇敢
+  - 被爱
+  - 梦想
+  - 成长
+
+# LLM 设置
+llm:
+  # 推荐用 gpt-4o-mini 试跑（便宜，约 $0.005/本），定稿时再切 gpt-4o
+  model: gpt-4o-mini
+  temperature: 0.8

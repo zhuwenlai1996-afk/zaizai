@@ -25,7 +25,8 @@
 | 🖼 **photo_restore** | 修复模糊、褪色的老照片，可一键打包成 Windows `.exe` 给不会用 Python 的家人 | PyTorch · GFPGAN · Real-ESRGAN · PyInstaller | [./photo_restore/README.md](./photo_restore/README.md) |
 | 📊 **attendance_ranking** | 替代企业脆弱、易错的考勤排名 Excel 公式，输出带条件格式与图表的报表 | openpyxl · pandas | [./attendance_ranking/README.md](./attendance_ranking/README.md) |
 | 💻 **pc_inventory** | 部门电脑资产采集与汇总：通过组策略 / 计划任务在每台电脑静默采集主机名、序列号、IP，再汇总成 Excel | Python 标准库 · openpyxl · PyInstaller | [./pc_inventory/README.md](./pc_inventory/README.md) |
-| 📖 **picture_book / ziqi_cloud_bunny** | 完整的"中文 AI 绘本人机协作工作流"参考实现：策划 → 编辑评审 → 分镜文案 → 生图提示词 | LLM · 文生图 prompt 工程 | [./picture_book/ziqi_cloud_bunny/README.md](./picture_book/ziqi_cloud_bunny/README.md) |
+| ✨ **picture_book_gen** | 中文 AI 绘本一键生成器：输入主题 + 主角，自动产出策划 → 评审 → 文案 → 生图提示词 4 份文档 | OpenAI API · Prompt Engineering · Pipeline | [./picture_book_gen/README.md](./picture_book_gen/README.md) |
+| 📖 **picture_book / ziqi_cloud_bunny** | "中文 AI 绘本人机协作工作流"参考样本：策划 → 编辑评审 → 分镜文案 → 生图提示词 | LLM · 文生图 prompt 工程 | [./picture_book/ziqi_cloud_bunny/README.md](./picture_book/ziqi_cloud_bunny/README.md) |
 
 ---
 
@@ -53,8 +54,17 @@ zaizai/
 │   ├── department_map.example.csv
 │   └── README.md
 │
+├── picture_book_gen/          # 中文 AI 绘本一键生成器
+│   ├── __main__.py            # python -m picture_book_gen
+│   ├── cli.py
+│   ├── pipeline.py            # BookConfig + LLMClient + Pipeline
+│   ├── prompts.py             # 4 步提示词模板
+│   ├── examples/config.example.yaml
+│   ├── requirements.txt
+│   └── README.md
+│
 ├── picture_book/
-│   └── ziqi_cloud_bunny/      # AI 绘本《云朵兔子大冒险》工作流
+│   └── ziqi_cloud_bunny/      # AI 绘本工作流的手写样本
 │       ├── 01-策划方案-原始版.md
 │       ├── 02-编辑评审.md
 │       ├── 03-逐页文案-修订版.md
@@ -114,9 +124,27 @@ python -m pc_inventory aggregate -i \\fileserver\share\pc_inventory\data -o 部�
 
 完整说明见 [pc_inventory/README.md](./pc_inventory/README.md)。
 
+### picture_book_gen
+
+```bash
+pip install -r picture_book_gen/requirements.txt
+export OPENAI_API_KEY=sk-xxxxxx
+
+# 一键生成一本中文绘本（4 份 markdown：策划/评审/文案/生图提示词）
+python -m picture_book_gen \
+  --title "勇敢的小蘑菇" --topic "勇敢与友谊" \
+  --protagonist-name "豆豆" --protagonist-age 4 \
+  -o ./book_output
+
+# 没有 API Key 时先试跑（不联网，产出占位结构）
+python -m picture_book_gen -c picture_book_gen/examples/config.example.yaml --dry-run
+```
+
+完整说明见 [picture_book_gen/README.md](./picture_book_gen/README.md)。
+
 ### picture_book / ziqi_cloud_bunny
 
-这是一个**文档型项目**，不是可执行代码。它给出一份可复用的中文 AI 绘本制作流程，包括分镜文案、生图提示词模板、对当前文生图工具中文渲染局限的说明。详见 [picture_book/ziqi_cloud_bunny/README.md](./picture_book/ziqi_cloud_bunny/README.md)。
+这是一个**文档型项目**，不是可执行代码。它是 `picture_book_gen` 工作流的**手写参考样本**——你想看"自动生成出来大致长什么样"，可以先看这里。详见 [picture_book/ziqi_cloud_bunny/README.md](./picture_book/ziqi_cloud_bunny/README.md)。
 
 ---
 
