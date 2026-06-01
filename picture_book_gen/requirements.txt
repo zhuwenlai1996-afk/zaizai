@@ -1,0 +1,9 @@
+# picture_book_gen 依赖
+#
+# 安装:
+#   pip install -r picture_book_gen/requirements.txt
+#
+# 如果只想用 --dry-run 模式（不调用 OpenAI），可以只装 PyYAML。
+
+openai>=1.30
+PyYAML>=6.0
